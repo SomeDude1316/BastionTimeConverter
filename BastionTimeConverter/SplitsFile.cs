@@ -115,7 +115,7 @@ namespace BastionTimeConverter
             }
             else if (category.Contains("ASL") || category.Contains("ALL STORY LEVELS"))
             {
-                Console.WriteLine("Category Detected: ASL");
+                Console.WriteLine("Category Detected: All Story Levels");
                 if(this.SoleRegret)
                 {
                     this.Levels.Add("Sole Regret");
@@ -183,6 +183,75 @@ namespace BastionTimeConverter
                     this.Levels.Add("Sole Regret");
                 }
                 this.Levels.Add("Wharf District");
+                this.Levels.Add("End");
+            }
+            else if (category.Contains("COLLECTIBLES") || category.Contains("AIC"))
+            {
+                Console.WriteLine("Category Detected: All Interactive Collectibles");
+                if (this.SoleRegret)
+                {
+                    this.Levels.Add("Sole Regret");
+                }
+                this.Levels.Add("Wharf District");
+                this.Levels.Add("Melting Pot");
+                this.Levels.Add("Workmen Ward");
+                this.Levels.Add("Sundown Path");
+                this.Levels.Add("Cinderbrick Fort");
+                this.Levels.Add("Pyth Orchard");
+                this.Levels.Add("Scrap Yard");
+                this.Levels.Add("Zulwood Grove");
+                this.Levels.Add("Windbag Ranch");
+                this.Levels.Add("Breaker Barracks");
+                this.Levels.Add("Trapper Shingle");
+                this.Levels.Add("Hanging Gardens");
+                this.Levels.Add("Roathus Lagoon");
+                this.Levels.Add("Prosper Bluff");
+                this.Levels.Add("Wild Outskirts");
+                this.Levels.Add("Point Lemaign");
+                this.Levels.Add("Colford Cauldron");
+                this.Levels.Add("Mount Zand");
+                this.Levels.Add("Urzendra Gate");
+                this.Levels.Add("Zulten's Hollow");
+                this.Levels.Add("Trigger Hill");
+                this.Levels.Add("Boundless Bay");
+                this.Levels.Add("Slinger Range");
+                this.Levels.Add("Camp Dauncy");
+                this.Levels.Add("Grady Incinerator");
+                this.Levels.Add("Mancer Observatory");
+                this.Levels.Add("Burstone Quarry");
+                this.Levels.Add("End");
+            }
+            else if (category.Contains("DREAMS") || category.Contains("DC"))
+            {
+                Console.WriteLine("Category Detected: Dreams and Challenges");
+                if (this.SoleRegret)
+                {
+                    this.Levels.Add("Sole Regret");
+                }
+                this.Levels.Add("Wharf District");
+                this.Levels.Add("Cinderbrick Fort");
+                this.Levels.Add("Workmen Ward");
+                this.Levels.Add("Hanging Gardens");
+                this.Levels.Add("Colford Cauldron");
+                this.Levels.Add("Mount Zand");
+                this.Levels.Add("Urzendra Gate");
+                this.Levels.Add("Zulten's Hollow");
+                this.Levels.Add("Trigger Hill");
+                this.Levels.Add("Boundless Bay");
+                this.Levels.Add("Scrap Yard");
+                this.Levels.Add("Zulwood Grove");
+                this.Levels.Add("Windbag Ranch");
+                this.Levels.Add("Breaker Barracks");
+                this.Levels.Add("Trapper Shingle");
+                this.Levels.Add("Bullhead Court");
+                this.Levels.Add("Camp Dauncy");
+                this.Levels.Add("Slinger Range");
+                this.Levels.Add("Grady Incinerator");
+                this.Levels.Add("Mancer Observatory");
+                this.Levels.Add("Point Lemaign");
+                this.Levels.Add("Kid's Dream");
+                this.Levels.Add("Singer's Dream");
+                this.Levels.Add("Survivor's Dream");
                 this.Levels.Add("End");
             }
             else

@@ -105,6 +105,8 @@ namespace BastionTimeConverter
         static Dictionary<string, int> MakeDelayDict()
         {
             Dictionary<string, int> dict = new Dictionary<string, int>();
+
+            //Story Levels
             dict.Add("Sole Regret", 0);
             dict.Add("Wharf District", 175);
             dict.Add("Workmen Ward", 50);
@@ -129,6 +131,26 @@ namespace BastionTimeConverter
             dict.Add("Tazal Terminals 2", 0);
             dict.Add("Tazal Terminals", 0);
             dict.Add("End", 0);
+
+            //Challenges
+            dict.Add("Scrap Yard", 50);
+            dict.Add("Trapper Shingle", 50);
+            dict.Add("Breaker Barracks", 50);
+            dict.Add("Windbag Ranch", 50);
+            dict.Add("Zulwood Grove", 50);
+            dict.Add("Slinger Range", 50);
+            dict.Add("Camp Dauncy", 50);
+            dict.Add("Trigger Hill", 50);
+            dict.Add("Grady Incinerator", 50);
+            dict.Add("Boundless Bay", 50);
+            dict.Add("Mancer Observatory", 50);
+            dict.Add("Bullhead Court", 50);
+
+            //Dreams
+            dict.Add("Kid's Dream", 0);
+            dict.Add("Singer's Dream", 0);
+            dict.Add("Survivor's Dream", 0);
+            dict.Add("Stranger's Dream", 0);
 
             return dict;
         }
