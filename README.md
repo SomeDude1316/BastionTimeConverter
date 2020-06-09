@@ -12,9 +12,6 @@ The program will generate a text file in the same folder as the application and 
 
 ## Compatibility
 
-Currently supported categories are:
- - Any% No MS (all variations)
- - All Story Levels (all variations)
- - All Weapons
+This converter supports all categories present on the Bastion leaderboard.
 
-Support for other categories coming soon.
+NOTE: All Dreams and Challenges currently only correctly converts the old route. Support for the new route coming soon.
