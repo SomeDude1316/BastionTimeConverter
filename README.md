@@ -1,14 +1,15 @@
-<h1>Bastion Time Converter</h1>
+<h1>Bastion Timing Converter</h1>
 
-A C# program that converts split times from a LiveSplit splits file (.lss) and generates a text file with that file's Personal Best or Sum of Best splits in both Skyway timing and Load timing.
+A C# program that converts split times from a LiveSplit splits file (.lss) and exports to a new splits file in either timing method used by Bastion's autosplitter.
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/46100845/101416599-d215ac00-38af-11eb-8673-46d1fc92a587.png" alt="Bastion Timing Converter"/>
+</p>
 
 ## Usage
 
-First, ensure that all files provided are in the same folder and that your autosplitter settings for your splits file are correct. Place any number of splits files into the same folder as the application. Then double-click "BastionTimeConverter.exe"
+First, ensure that your autosplitter settings for your splits file are correct. The program will not open the splits file if it detects a file for a game other than Bastion, or if it can't detect a category or autosplitter settings.
 
-You will be prompted to choose a splits file to convert. Type "n" until you see the splits file you want to convert, then type "y" into the command prompt. Select whether you want to receive Personal Best splits or Sum of Best splits, then confirm that the conversion settings are correct.
-
-The program will generate a text file in the same folder as the application and splits file containing the splits in both Skyway and Load timing.
+Simply open the file you want to convert, and you will see your personal best and sum of best times in both Skyway and Load timings. You can then export either of these timings to a new splits file. 
 
 ## Compatibility
 
