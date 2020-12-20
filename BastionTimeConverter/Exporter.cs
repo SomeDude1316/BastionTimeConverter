@@ -75,15 +75,15 @@ namespace BastionTimeConverter
                 writer.WriteLine("      <Icon />");
                 writer.WriteLine("      <SplitTimes>");
                 writer.WriteLine("        <SplitTime name=\"Personal Best\">");
-                if (!entry.Value.Equals("00:00.00"))
+                if (!entry.Value.Equals("00:00:00.00"))
                 {
-                    writer.WriteLine($"          <RealTime>00:{entry.Value}00000</RealTime>");
+                    writer.WriteLine($"          <RealTime>{entry.Value}00000</RealTime>");
                 }
                 writer.WriteLine("          <GameTime>00:00:00</GameTime>");
                 writer.WriteLine("        </SplitTime>");
                 writer.WriteLine("      </SplitTimes>");
                 writer.WriteLine("      <BestSegmentTime>");
-                writer.WriteLine($"        <RealTime>00:{sumOfBest[entry.Key]}00000</RealTime>");
+                writer.WriteLine($"        <RealTime>{sumOfBest[entry.Key]}00000</RealTime>");
                 writer.WriteLine("      </BestSegmentTime>");
                 writer.WriteLine("      <SegmentHistory />");
                 writer.WriteLine("    </Segment>");
@@ -92,6 +92,7 @@ namespace BastionTimeConverter
             writer.WriteLine("  </Segments>");
             writer.WriteLine("  <AutoSplitterSettings>");
             writer.WriteLine("    <IL_Mode>False</IL_Mode>");
+
             if (target.Equals(Target.Skyway))
             {
                 writer.WriteLine($"    <Skyway_Mode>True</Skyway_Mode>");
@@ -102,6 +103,7 @@ namespace BastionTimeConverter
                 writer.WriteLine($"    <Skyway_Mode>False</Skyway_Mode>");
                 writer.WriteLine($"    <Load_Mode>True</Load_Mode>");
             }
+
             writer.WriteLine("    <Reset>True</Reset>");
             writer.WriteLine("    <Start>True</Start>");
             writer.WriteLine("    <Split>True</Split>");

@@ -65,9 +65,6 @@ namespace BastionTimeConverter
                 splits = File.SOBSplits;
             }
 
-            string format = "{0, 18} {1, 15} {2, 15}";
-            Console.WriteLine(String.Format(format, "Split", "Skyway", "Load"));
-            Console.WriteLine();
 
             Dictionary<string, string> output = new Dictionary<string, string>();
 
@@ -83,8 +80,7 @@ namespace BastionTimeConverter
 
                 if (timeInMs == 0)
                 {
-                    Console.WriteLine(String.Format(format, currentLevel, "--------", "--------"));
-                    output.Add(currentLevel, "00:00.00");
+                    output.Add(currentLevel, "00:00:00.00");
                     continue;
                 }
 
@@ -110,8 +106,6 @@ namespace BastionTimeConverter
                     }
 
                     totalLoad += timeInMs;
-
-                    Console.WriteLine(String.Format(format, currentLevel, splits[currentLevel], IntToString(timeInMs)));
                 }
                 else
                 {
@@ -137,16 +131,8 @@ namespace BastionTimeConverter
                     }
 
                     totalSkyway += timeInMs;
-
-                    Console.WriteLine(String.Format(format, currentLevel, IntToString(timeInMs), splits[currentLevel]));
                 }
                 prevDiff = diff;
-            }
-
-            if (comparison.Equals(SplitsFile.Comparison.SumOfBest))
-            {
-                Console.WriteLine();
-                Console.WriteLine(String.Format(format, "Total", IntToString(totalSkyway), IntToString(totalLoad)));
             }
 
             if (File.Target.Equals(SplitsFile.Timing.Skyway) && comparison.Equals(SplitsFile.Comparison.PersonalBest))
@@ -165,25 +151,88 @@ namespace BastionTimeConverter
             {
                 SOBLoad = output;
             }
+            WriteToBox(comparison, totalSkyway, totalLoad);
+        }
+
+        private void WriteToBox(SplitsFile.Comparison comparison, int totalSkyway, int totalLoad)
+        {
+            Dictionary<string, string> skyway, load;
+            if(comparison.Equals(SplitsFile.Comparison.PersonalBest))
+            {
+                skyway = PBSkyway;
+                load = PBLoad;
+            }
+            else
+            {
+                skyway = SOBSkyway;
+                load = SOBLoad;
+            }
+
+            string format = "{0, 18} {1, 15} {2, 15}";
+            Console.WriteLine(String.Format(format, "Split", "Skyway", "Load"));
+            Console.WriteLine();
+
+            foreach(KeyValuePair<string, string> entry in skyway)
+            {
+                if (entry.Value.Equals("00:00:00.00"))
+                {
+                    if (File.IsLong)
+                    {
+                        Console.WriteLine(String.Format(format, entry.Key, "-----------", "-----------"));
+                    }
+                    else
+                    {
+                        Console.WriteLine(String.Format(format, entry.Key, "--------", "--------"));
+                    }
+                }
+                else
+                {
+                    if (File.IsLong)
+                    {
+                        Console.WriteLine(String.Format(format, entry.Key, entry.Value, load[entry.Key]));
+                    }
+                    else
+                    {
+                        Console.WriteLine(String.Format(format, entry.Key, entry.Value.Substring(3), load[entry.Key].Substring(3)));
+                    }
+                }
+            }
+
+            if (comparison.Equals(SplitsFile.Comparison.SumOfBest))
+            {
+                string skywayString = IntToString(totalSkyway);
+                string loadString = IntToString(totalLoad);
+
+                if (!File.IsLong)
+                {
+                    skywayString = skywayString.Substring(3);
+                    loadString = loadString.Substring(3);
+                }
+
+                Console.WriteLine();
+                Console.WriteLine(String.Format(format, "Total", skywayString, loadString));
+            }
         }
 
         private int StringToInt(string time)
         {
-            int min = int.Parse(time.Substring(0, 2)) * 60 * 100;
-            int sec = int.Parse(time.Substring(3, 2)) * 100;
-            int ms = int.Parse(time.Substring(6, 2));
+            int hrs = int.Parse(time.Substring(0, 2)) * 60 * 60 * 100;
+            int min = int.Parse(time.Substring(3, 2)) * 60 * 100;
+            int sec = int.Parse(time.Substring(6, 2)) * 100;
+            int ms = int.Parse(time.Substring(9, 2));
 
-            int total = min + sec + ms;
+            int total = hrs + min + sec + ms;
             return total;
         }
 
         private String IntToString(int num)
         {
-            string min = String.Format("{0:D2}", (num / 6000));
+            string hrs = String.Format("{0:D2}", num / 360000);
+            string min = String.Format("{0:D2}", (num / 6000 % 60));
             string sec = String.Format("{0:D2}", (num / 100 % 60));
             string ms = String.Format("{0:D2}", (num % 100));
 
-            return min + ":" + sec + "." + ms;
+            return hrs + ":" + min + ":" + sec + "." + ms;
         }
     }
 }

@@ -27,7 +27,7 @@ namespace BastionTimeConverter
         public bool Ram { get; private set; }
         public Timing Time { get; private set; }
         public Timing Target { get; private set; }
-        public Comparison Compare { get; private set; }
+        public bool IsLong { get; private set; }
 
         //CONSTRUCTOR
         public SplitsFile(XmlDocument doc)
@@ -46,6 +46,7 @@ namespace BastionTimeConverter
             Levels = BuildLevelList();
             PBSplits = SetSplits(Comparison.PersonalBest);
             SOBSplits = SetSplits(Comparison.SumOfBest);
+            IsLong = CheckLong();
         }
 
         public SplitsFile()
@@ -59,6 +60,18 @@ namespace BastionTimeConverter
             if (GameName.ToUpper().Equals("BASTION"))
             {
                 return true;
+            }
+            return false;
+        }
+
+        private bool CheckLong()
+        {
+            foreach(KeyValuePair<string, string> entry in PBSplits)
+            {
+                if (!entry.Value.Substring(0, 2).Equals("00"))
+                {
+                    return true;
+                }
             }
             return false;
         }
@@ -346,10 +359,14 @@ namespace BastionTimeConverter
                     time = time.Substring(0, 8);
                     time += ".00";
                 }
-                time = time.Substring(3, 8);
+                else
+                {
+                    time = time.Substring(0, 11);
+                }
 
                 Splits.Add(name, time);
             }
+
             return Splits;
         }
         public enum Timing
