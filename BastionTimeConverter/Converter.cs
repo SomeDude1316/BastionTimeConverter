@@ -12,10 +12,10 @@ namespace BastionTimeConverter
     {
         public OffsetData Offsets { get; private set; }
         public SplitsFile File { get; private set; }
-        public Dictionary<string, string> PBSkyway { get; private set; }
-        public Dictionary<string, string> SOBSkyway { get; private set; }
-        public Dictionary<string, string> PBLoad { get; private set; }
-        public Dictionary<string, string> SOBLoad { get; private set; }
+        public Dictionary<string, TimeSpan> PBSkyway { get; private set; }
+        public Dictionary<string, TimeSpan> SOBSkyway { get; private set; }
+        public Dictionary<string, TimeSpan> PBLoad { get; private set; }
+        public Dictionary<string, TimeSpan> SOBLoad { get; private set; }
 
         public Converter()
         {
@@ -31,14 +31,8 @@ namespace BastionTimeConverter
         {
             XmlDocument doc = new XmlDocument();
             doc.Load(openFile);
-            if (doc.GetElementsByTagName("GameName").Item(0).InnerText.ToUpper().Equals("BASTION"))
-            {
-                File = new SplitsFile(doc);
-            }
-            else
-            {
-                File = new SplitsFile();
-            }
+
+            File = doc.GetElementsByTagName("GameName").Item(0).InnerText.ToUpper().Equals("BASTION") ? new SplitsFile(doc) : new SplitsFile();
         }
 
         public void Convert(SplitsFile.Comparison comparison)
@@ -54,83 +48,76 @@ namespace BastionTimeConverter
                 SOBLoad = File.SOBSplits;
             }
 
-            Dictionary<string, string> splits;
+            Dictionary<string, TimeSpan> splits;
 
-            if (comparison.Equals(SplitsFile.Comparison.PersonalBest))
-            {
-                splits = File.PBSplits;
-            }
-            else
-            {
-                splits = File.SOBSplits;
-            }
+            splits = comparison.Equals(SplitsFile.Comparison.PersonalBest) ? File.PBSplits : File.SOBSplits;
 
 
-            Dictionary<string, string> output = new Dictionary<string, string>();
+            Dictionary<string, TimeSpan> output = new Dictionary<string, TimeSpan>();
 
-            int timeInMs, diff, prevDiff = 0, totalDiff = 0;
-            int totalSkyway = 0, totalLoad = 0;
-            string currentLevel;
+            TimeSpan currTime, diff, prevDiff = TimeSpan.Zero, totalDiff = TimeSpan.Zero;
+            TimeSpan totalSkyway = TimeSpan.Zero, totalLoad = TimeSpan.Zero;
+            string currLevel;
 
             for (int k = 0; k < File.Levels.Count; k++)
             {
-                currentLevel = File.Levels[k];
-                timeInMs = StringToInt(splits[currentLevel]);
-                diff = Offsets.Delays[currentLevel];
+                currLevel = File.Levels[k];
+                currTime = splits[currLevel];
+                diff = Offsets.Delays[currLevel];
 
-                if (timeInMs == 0)
+                if (currTime == TimeSpan.Zero)
                 {
-                    output.Add(currentLevel, "00:00:00.00");
+                    output.Add(currLevel, TimeSpan.Zero);
                     continue;
                 }
 
                 if (File.Target.Equals(SplitsFile.Timing.Load))
                 {
-                    totalSkyway += timeInMs;
+                    totalSkyway = totalSkyway.Add(currTime);
 
-                    timeInMs -= prevDiff;
-                    timeInMs += diff;
+                    currTime = currTime.Subtract(prevDiff);
+                    currTime = currTime.Add(diff);
 
                     if (comparison.Equals(SplitsFile.Comparison.PersonalBest))
                     {
 
-                        timeInMs += totalDiff;
-                        totalDiff += diff;
-                        totalDiff -= prevDiff;
+                        currTime = currTime.Add(totalDiff);
+                        totalDiff = totalDiff.Add(diff);
+                        totalDiff = totalDiff.Subtract(prevDiff);
 
-                        output.Add(currentLevel, IntToString(timeInMs));
+                        output.Add(currLevel, currTime);
                     }
                     else
                     {
-                        output.Add(currentLevel, IntToString(timeInMs));
+                        output.Add(currLevel, currTime);
                     }
 
-                    totalLoad += timeInMs;
+                    totalLoad = totalLoad.Add(currTime);
                 }
                 else
                 {
-                    totalLoad += timeInMs;
+                    totalLoad = totalLoad.Add(currTime);
 
 
-                    timeInMs += prevDiff;
-                    timeInMs -= diff;
+                    currTime = currTime.Add(prevDiff);
+                    currTime = currTime.Subtract(diff);
 
 
                     if (comparison.Equals(SplitsFile.Comparison.PersonalBest))
                     {
 
-                        timeInMs += totalDiff;
-                        totalDiff -= diff;
-                        totalDiff += prevDiff;
+                        currTime = currTime.Add(totalDiff);
+                        totalDiff = totalDiff.Subtract(diff);
+                        totalDiff = totalDiff.Add(prevDiff);
 
-                        output.Add(currentLevel, IntToString(timeInMs));
+                        output.Add(currLevel, currTime);
                     }
                     else
                     {
-                        output.Add(currentLevel, IntToString(timeInMs));
+                        output.Add(currLevel, currTime);
                     }
 
-                    totalSkyway += timeInMs;
+                    totalSkyway = totalSkyway.Add(currTime);
                 }
                 prevDiff = diff;
             }
@@ -154,10 +141,10 @@ namespace BastionTimeConverter
             WriteToBox(comparison, totalSkyway, totalLoad);
         }
 
-        private void WriteToBox(SplitsFile.Comparison comparison, int totalSkyway, int totalLoad)
+        private void WriteToBox(SplitsFile.Comparison comparison, TimeSpan totalSkyway, TimeSpan totalLoad)
         {
-            Dictionary<string, string> skyway, load;
-            if(comparison.Equals(SplitsFile.Comparison.PersonalBest))
+            Dictionary<string, TimeSpan> skyway, load;
+            if (comparison.Equals(SplitsFile.Comparison.PersonalBest))
             {
                 skyway = PBSkyway;
                 load = PBLoad;
@@ -168,71 +155,33 @@ namespace BastionTimeConverter
                 load = SOBLoad;
             }
 
-            string format = "{0, 18} {1, 15} {2, 15}";
-            Console.WriteLine(String.Format(format, "Split", "Skyway", "Load"));
+            string timeFormat, format = "{0, 18} {1, 15} {2, 15}";
+
+            Console.WriteLine(format, "Split", "Skyway", "Load");
             Console.WriteLine();
 
-            foreach(KeyValuePair<string, string> entry in skyway)
+            foreach (KeyValuePair<string, TimeSpan> entry in skyway)
             {
-                if (entry.Value.Equals("00:00:00.00"))
+                if (entry.Value.Equals(TimeSpan.Zero))
                 {
-                    if (File.IsLong)
-                    {
-                        Console.WriteLine(String.Format(format, entry.Key, "-----------", "-----------"));
-                    }
-                    else
-                    {
-                        Console.WriteLine(String.Format(format, entry.Key, "--------", "--------"));
-                    }
+                    if (entry.Value.Hours > 0) Console.WriteLine(format, entry.Key, "-----------", "-----------");
+                    else Console.WriteLine(format, entry.Key, "--------", "--------");
                 }
                 else
                 {
-                    if (File.IsLong)
-                    {
-                        Console.WriteLine(String.Format(format, entry.Key, entry.Value, load[entry.Key]));
-                    }
-                    else
-                    {
-                        Console.WriteLine(String.Format(format, entry.Key, entry.Value.Substring(3), load[entry.Key].Substring(3)));
-                    }
+                    timeFormat = entry.Value.Hours > 0 ? @"%h\:mm\:ss\.ff" : @"%m\:ss\.ff";
+
+                    Console.WriteLine(format, entry.Key, entry.Value.ToString(timeFormat), load[entry.Key].ToString(timeFormat));
                 }
             }
 
             if (comparison.Equals(SplitsFile.Comparison.SumOfBest))
             {
-                string skywayString = IntToString(totalSkyway);
-                string loadString = IntToString(totalLoad);
-
-                if (!File.IsLong)
-                {
-                    skywayString = skywayString.Substring(3);
-                    loadString = loadString.Substring(3);
-                }
+                timeFormat = totalSkyway.Hours > 0 ? @"%h\:mm\:ss\.ff" : @"%m\:ss\.ff";
 
                 Console.WriteLine();
-                Console.WriteLine(String.Format(format, "Total", skywayString, loadString));
+                Console.WriteLine(format, "Total", totalSkyway.ToString(timeFormat), totalLoad.ToString(timeFormat));
             }
-        }
-
-        private int StringToInt(string time)
-        {
-            int hrs = int.Parse(time.Substring(0, 2)) * 60 * 60 * 100;
-            int min = int.Parse(time.Substring(3, 2)) * 60 * 100;
-            int sec = int.Parse(time.Substring(6, 2)) * 100;
-            int ms = int.Parse(time.Substring(9, 2));
-
-            int total = hrs + min + sec + ms;
-            return total;
-        }
-
-        private String IntToString(int num)
-        {
-            string hrs = String.Format("{0:D2}", num / 360000);
-            string min = String.Format("{0:D2}", (num / 6000 % 60));
-            string sec = String.Format("{0:D2}", (num / 100 % 60));
-            string ms = String.Format("{0:D2}", (num % 100));
-
-            return hrs + ":" + min + ":" + sec + "." + ms;
         }
     }
 }

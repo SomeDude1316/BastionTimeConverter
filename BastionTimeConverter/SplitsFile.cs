@@ -16,9 +16,9 @@ namespace BastionTimeConverter
         public string CatName { get; private set; }
         public string CatDetect { get; private set; }
         public string AttemptCount { get; private set; }
-        public List<String> Levels { get; private set; }
-        public Dictionary<String, String> PBSplits { get; private set; }
-        public Dictionary<String, String> SOBSplits { get; private set; }
+        public List<string> Levels { get; private set; }
+        public Dictionary<string, TimeSpan> PBSplits { get; private set; }
+        public Dictionary<string, TimeSpan> SOBSplits { get; private set; }
         public bool AutoSplitSet { get; private set; }
         public bool IsSkyway { get; private set; }
         public bool IsLoad { get; private set; }
@@ -27,7 +27,6 @@ namespace BastionTimeConverter
         public bool Ram { get; private set; }
         public Timing Time { get; private set; }
         public Timing Target { get; private set; }
-        public bool IsLong { get; private set; }
 
         //CONSTRUCTOR
         public SplitsFile(XmlDocument doc)
@@ -46,7 +45,6 @@ namespace BastionTimeConverter
             Levels = BuildLevelList();
             PBSplits = SetSplits(Comparison.PersonalBest);
             SOBSplits = SetSplits(Comparison.SumOfBest);
-            IsLong = CheckLong();
         }
 
         public SplitsFile()
@@ -60,18 +58,6 @@ namespace BastionTimeConverter
             if (GameName.ToUpper().Equals("BASTION"))
             {
                 return true;
-            }
-            return false;
-        }
-
-        private bool CheckLong()
-        {
-            foreach(KeyValuePair<string, string> entry in PBSplits)
-            {
-                if (!entry.Value.Substring(0, 2).Equals("00"))
-                {
-                    return true;
-                }
             }
             return false;
         }
@@ -130,7 +116,7 @@ namespace BastionTimeConverter
             }
         }
 
-        private List<String> BuildLevelList()
+        private List<string> BuildLevelList()
         {
             Levels = new List<string>();
             string category = CatName.ToUpper();
@@ -313,21 +299,21 @@ namespace BastionTimeConverter
             return Levels;
         }
 
-        private Dictionary<string, string> SetSplits(Comparison comparison)
+        private Dictionary<string, TimeSpan> SetSplits(Comparison comparison)
         {
             if (Levels == null)
             {
                 return null;
             }
-            
-            Dictionary<string, string> Splits = new Dictionary<string, string>();
+
+            Dictionary<string, TimeSpan> Splits = new Dictionary<string, TimeSpan>();
 
             XmlNodeList splitNames = File.GetElementsByTagName("Name");
             XmlNodeList splitTimes;
 
             if (comparison == Comparison.SumOfBest)
             {
-                splitTimes = File.GetElementsByTagName("BestSegmentTime");
+                splitTimes = File.DocumentElement.SelectNodes("./Segments/Segment/BestSegmentTime/RealTime");
             }
             else if (comparison == Comparison.PersonalBest)
             {
@@ -343,7 +329,9 @@ namespace BastionTimeConverter
                 return null;
             }
 
-            string name, time;
+            string name;
+            string timeStr;
+            TimeSpan time;
 
             for (int k = 0; k < splitNames.Count; k++)
             {
@@ -353,16 +341,9 @@ namespace BastionTimeConverter
                     name = Levels[k];
                 }
 
-                time = splitTimes.Item(k).InnerText.Trim();
-                if (!time.Contains("."))
-                {
-                    time = time.Substring(0, 8);
-                    time += ".00";
-                }
-                else
-                {
-                    time = time.Substring(0, 11);
-                }
+                timeStr = splitTimes.Item(k).InnerText.Trim();
+                if (!timeStr.Contains(".")) timeStr += ".00";
+                time = TimeSpan.Parse(timeStr.Substring(0, 11));
 
                 Splits.Add(name, time);
             }

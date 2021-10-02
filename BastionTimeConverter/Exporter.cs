@@ -12,17 +12,17 @@ namespace BastionTimeConverter
     {
         public string FileName { get; private set; }
         public SplitsFile File { get; private set; }
-        public Dictionary<string, string> SkywayPB { get; private set; }
-        public Dictionary<string, string> SkywaySOB { get; private set; }
-        public Dictionary<string, string> LoadPB { get; private set; }
-        public Dictionary<string, string> LoadSOB { get; private set; }
+        public Dictionary<string, TimeSpan> SkywayPB { get; private set; }
+        public Dictionary<string, TimeSpan> SkywaySOB { get; private set; }
+        public Dictionary<string, TimeSpan> LoadPB { get; private set; }
+        public Dictionary<string, TimeSpan> LoadSOB { get; private set; }
 
         public Exporter(string fileName,
             SplitsFile file,
-            Dictionary<string, string> skywayPB,
-            Dictionary<string, string> skywaySOB,
-            Dictionary<string, string> loadPB,
-            Dictionary<string, string> loadSOB)
+            Dictionary<string, TimeSpan> skywayPB,
+            Dictionary<string, TimeSpan> skywaySOB,
+            Dictionary<string, TimeSpan> loadPB,
+            Dictionary<string, TimeSpan> loadSOB)
         {
             FileName = fileName;
             File = file;
@@ -35,7 +35,7 @@ namespace BastionTimeConverter
         public void Export(Target target)
         {
 
-            Dictionary<string, string> personalBest, sumOfBest;
+            Dictionary<string, TimeSpan> personalBest, sumOfBest;
 
             if (target.Equals(Target.Skyway))
             {
@@ -68,22 +68,22 @@ namespace BastionTimeConverter
             writer.WriteLine("  <AttemptHistory />");
             writer.WriteLine("  <Segments>");
 
-            foreach (KeyValuePair<string, string> entry in personalBest)
+            foreach (KeyValuePair<string, TimeSpan> entry in personalBest)
             {
                 writer.WriteLine("    <Segment>");
                 writer.WriteLine($"      <Name>{entry.Key}</Name>");
                 writer.WriteLine("      <Icon />");
                 writer.WriteLine("      <SplitTimes>");
                 writer.WriteLine("        <SplitTime name=\"Personal Best\">");
-                if (!entry.Value.Equals("00:00:00.00"))
+                if (!entry.Value.Equals(TimeSpan.Zero))
                 {
-                    writer.WriteLine($"          <RealTime>{entry.Value}00000</RealTime>");
+                    writer.WriteLine($"          <RealTime>{entry.Value}</RealTime>");
                 }
                 writer.WriteLine("          <GameTime>00:00:00</GameTime>");
                 writer.WriteLine("        </SplitTime>");
                 writer.WriteLine("      </SplitTimes>");
                 writer.WriteLine("      <BestSegmentTime>");
-                writer.WriteLine($"        <RealTime>{sumOfBest[entry.Key]}00000</RealTime>");
+                writer.WriteLine($"        <RealTime>{sumOfBest[entry.Key]}</RealTime>");
                 writer.WriteLine("      </BestSegmentTime>");
                 writer.WriteLine("      <SegmentHistory />");
                 writer.WriteLine("    </Segment>");
@@ -108,9 +108,9 @@ namespace BastionTimeConverter
             writer.WriteLine("    <Start>True</Start>");
             writer.WriteLine("    <Split>True</Split>");
             writer.WriteLine("    <End>True</End>");
-            writer.WriteLine($"    <Tazal>{File.Tazal.ToString()}</Tazal>");
-            writer.WriteLine($"    <Ram>{File.Ram.ToString()}</Ram>");
-            writer.WriteLine($"    <SoleRegret>{File.SoleRegret.ToString()}</SoleRegret>");
+            writer.WriteLine($"    <Tazal>{File.Tazal}</Tazal>");
+            writer.WriteLine($"    <Ram>{File.Ram}</Ram>");
+            writer.WriteLine($"    <SoleRegret>{File.SoleRegret}</SoleRegret>");
             writer.WriteLine("  </AutoSplitterSettings>");
             writer.WriteLine("</Run>");
 
