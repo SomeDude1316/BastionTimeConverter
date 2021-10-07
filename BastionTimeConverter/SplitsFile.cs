@@ -32,10 +32,10 @@ namespace BastionTimeConverter
         public SplitsFile(XmlDocument doc)
         {
             File = doc;
-            GameName = File.GetElementsByTagName("GameName").Item(0).InnerText;
+            GameName = File.DocumentElement["GameName"].InnerText;
             IsValid = ValidateGameName();
-            CatName = File.GetElementsByTagName("CategoryName").Item(0).InnerText;
-            AttemptCount = File.GetElementsByTagName("AttemptCount").Item(0).InnerText;
+            CatName = File.DocumentElement["CategoryName"].InnerText;
+            AttemptCount = File.DocumentElement["AttemptCount"].InnerText;
 
             CheckAutosplitter();
 
@@ -64,7 +64,8 @@ namespace BastionTimeConverter
 
         private void CheckAutosplitter()
         {
-            if (File.GetElementsByTagName("AutoSplitterSettings").Item(0).ChildNodes.Count == 0)
+            XmlNode auto = File.DocumentElement["AutoSplitterSettings"];
+            if (auto.ChildNodes.Count == 0)
             {
                 AutoSplitSet = false;
                 IsSkyway = false;
@@ -76,11 +77,11 @@ namespace BastionTimeConverter
             else
             {
                 AutoSplitSet = true;
-                IsSkyway = Boolean.Parse(File.GetElementsByTagName("Skyway_Mode").Item(0).InnerText);
-                IsLoad = Boolean.Parse(File.GetElementsByTagName("Load_Mode").Item(0).InnerText);
-                SoleRegret = Boolean.Parse(File.GetElementsByTagName("SoleRegret").Item(0).InnerText);
-                Tazal = Boolean.Parse(File.GetElementsByTagName("Tazal").Item(0).InnerText);
-                Ram = Boolean.Parse(File.GetElementsByTagName("Ram").Item(0).InnerText);
+                IsSkyway = Boolean.Parse(auto["Skyway_Mode"].InnerText);
+                IsLoad = Boolean.Parse(auto["Load_Mode"].InnerText);
+                SoleRegret = Boolean.Parse(auto["SoleRegret"].InnerText);
+                Tazal = Boolean.Parse(auto["Tazal"].InnerText);
+                Ram = Boolean.Parse(auto["Ram"].InnerText);
             }
         }
 
@@ -317,7 +318,7 @@ namespace BastionTimeConverter
             }
             else if (comparison == Comparison.PersonalBest)
             {
-                splitTimes = File.DocumentElement.SelectNodes("./Segments/Segment/SplitTimes/SplitTime[@name='Personal Best']");
+                splitTimes = File.DocumentElement.SelectNodes("./Segments/Segment/SplitTimes/SplitTime[@name='Personal Best']/RealTime");
             }
             else
             {
