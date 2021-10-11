@@ -65,7 +65,7 @@ namespace BastionTimeConverter
         private void CheckAutosplitter()
         {
             XmlNode auto = File.DocumentElement["AutoSplitterSettings"];
-            if (auto.ChildNodes.Count == 0)
+            if (!auto.HasChildNodes)
             {
                 AutoSplitSet = false;
                 IsSkyway = false;
@@ -314,11 +314,11 @@ namespace BastionTimeConverter
 
             if (comparison == Comparison.SumOfBest)
             {
-                splitTimes = File.DocumentElement.SelectNodes("./Segments/Segment/BestSegmentTime/RealTime");
+                splitTimes = File.DocumentElement.SelectNodes("./Segments/Segment/BestSegmentTime");
             }
             else if (comparison == Comparison.PersonalBest)
             {
-                splitTimes = File.DocumentElement.SelectNodes("./Segments/Segment/SplitTimes/SplitTime[@name='Personal Best']/RealTime");
+                splitTimes = File.DocumentElement.SelectNodes("./Segments/Segment/SplitTimes/SplitTime[@name='Personal Best']");
             }
             else
             {
@@ -342,7 +342,7 @@ namespace BastionTimeConverter
                     name = Levels[k];
                 }
 
-                timeStr = splitTimes.Item(k).InnerText.Trim();
+                timeStr = splitTimes.Item(k).HasChildNodes && splitTimes.Item(k).FirstChild.Name == "RealTime" ? splitTimes.Item(k)["RealTime"].InnerText.Trim() : "00:00:00.00";
                 if (!timeStr.Contains(".")) timeStr += ".00";
                 time = TimeSpan.Parse(timeStr.Substring(0, 11));
 

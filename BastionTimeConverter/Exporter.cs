@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace BastionTimeConverter
 {
@@ -48,72 +49,91 @@ namespace BastionTimeConverter
                 sumOfBest = LoadSOB;
             }
 
-            StreamWriter writer = new StreamWriter($"{FileName}");
+            XmlWriterSettings settings = new XmlWriterSettings { Indent = true };
 
-            writer.WriteLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-            writer.WriteLine("<Run version=\"1.7.0\">");
-            writer.WriteLine("  <GameIcon />");
-            writer.WriteLine("  <GameName>Bastion</GameName>");
-            writer.WriteLine($"  <CategoryName>{File.CatName}</CategoryName>");
-            writer.WriteLine("  <Metadata>");
-            writer.WriteLine("    <Run id=\"\" />");
-            writer.WriteLine("    <Platform usesEmulator=\"False\">");
-            writer.WriteLine("    </Platform>");
-            writer.WriteLine("    <Region>");
-            writer.WriteLine("    </Region>");
-            writer.WriteLine("    <Variables />");
-            writer.WriteLine("  </Metadata>");
-            writer.WriteLine("  <Offset>00:00:00</Offset>");
-            writer.WriteLine($"  <AttemptCount>{File.AttemptCount}</AttemptCount>");
-            writer.WriteLine("  <AttemptHistory />");
-            writer.WriteLine("  <Segments>");
+            XmlWriter writer = XmlWriter.Create($"{FileName}", settings);
+
+            writer.WriteStartDocument();
+
+            writer.WriteStartElement("Run");
+            writer.WriteAttributeString("version", null, "1.7.0");
+
+            writer.WriteElementString("GameIcon", null);
+            writer.WriteElementString("GameName", "Bastion");
+            writer.WriteElementString("CategoryName", File.CatName);
+
+            writer.WriteStartElement("Metadata");
+
+            writer.WriteStartElement("Run");
+            writer.WriteAttributeString("id", null, "");
+            writer.WriteEndElement(); //Run
+
+            writer.WriteStartElement("Platform");
+            writer.WriteAttributeString("usesEmulator", null, "False");
+            writer.WriteEndElement(); //Platform
+
+            writer.WriteElementString("Region", null);
+
+            writer.WriteElementString("Variables", null);
+
+            writer.WriteEndElement(); //Metadata
+
+            writer.WriteElementString("Offset", "00:00:00");
+            writer.WriteElementString("AttemptCount", File.AttemptCount);
+            writer.WriteElementString("AttemptHistory", null);
+
+            writer.WriteStartElement("Segments");
 
             foreach (KeyValuePair<string, TimeSpan> entry in personalBest)
             {
-                writer.WriteLine("    <Segment>");
-                writer.WriteLine($"      <Name>{entry.Key}</Name>");
-                writer.WriteLine("      <Icon />");
-                writer.WriteLine("      <SplitTimes>");
-                writer.WriteLine("        <SplitTime name=\"Personal Best\">");
+                writer.WriteStartElement("Segment");
+
+                writer.WriteElementString("Name", entry.Key);
+                writer.WriteElementString("Icon", null);
+                writer.WriteStartElement("SplitTimes");
+
+                writer.WriteStartElement("SplitTime");
+                writer.WriteAttributeString("name", null, "Personal Best");
+
                 if (!entry.Value.Equals(TimeSpan.Zero))
                 {
-                    writer.WriteLine($"          <RealTime>{entry.Value}</RealTime>");
+                    writer.WriteElementString("RealTime", entry.Value.ToString());
                 }
-                writer.WriteLine("          <GameTime>00:00:00</GameTime>");
-                writer.WriteLine("        </SplitTime>");
-                writer.WriteLine("      </SplitTimes>");
-                writer.WriteLine("      <BestSegmentTime>");
-                writer.WriteLine($"        <RealTime>{sumOfBest[entry.Key]}</RealTime>");
-                writer.WriteLine("      </BestSegmentTime>");
-                writer.WriteLine("      <SegmentHistory />");
-                writer.WriteLine("    </Segment>");
+
+                //writer.WriteElementString("GameTime", "00:00:00");
+
+                writer.WriteEndElement(); //SplitTime
+                writer.WriteEndElement(); //SplitTimes
+
+                writer.WriteStartElement("BestSegmentTime");
+                writer.WriteElementString("RealTime", sumOfBest[entry.Key].ToString());
+                writer.WriteEndElement(); //BestSegmentTime
+
+                writer.WriteElementString("SegmentHistory", null);
+                writer.WriteEndElement(); //Segment
             }
 
-            writer.WriteLine("  </Segments>");
-            writer.WriteLine("  <AutoSplitterSettings>");
-            writer.WriteLine("    <IL_Mode>False</IL_Mode>");
+            writer.WriteEndElement(); //Segments
 
-            if (target.Equals(Target.Skyway))
-            {
-                writer.WriteLine($"    <Skyway_Mode>True</Skyway_Mode>");
-                writer.WriteLine($"    <Load_Mode>False</Load_Mode>");
-            }
-            else
-            {
-                writer.WriteLine($"    <Skyway_Mode>False</Skyway_Mode>");
-                writer.WriteLine($"    <Load_Mode>True</Load_Mode>");
-            }
+            writer.WriteStartElement("AutoSplitterSettings");
 
-            writer.WriteLine("    <Reset>True</Reset>");
-            writer.WriteLine("    <Start>True</Start>");
-            writer.WriteLine("    <Split>True</Split>");
-            writer.WriteLine("    <End>True</End>");
-            writer.WriteLine($"    <Tazal>{File.Tazal}</Tazal>");
-            writer.WriteLine($"    <Ram>{File.Ram}</Ram>");
-            writer.WriteLine($"    <SoleRegret>{File.SoleRegret}</SoleRegret>");
-            writer.WriteLine("  </AutoSplitterSettings>");
-            writer.WriteLine("</Run>");
+            writer.WriteElementString("IL_Mode", "False");
+            writer.WriteElementString("Skyway_Mode", target.Equals(Target.Skyway) ? "True" : "False");
+            writer.WriteElementString("Load_Mode", target.Equals(Target.Load) ? "True" : "False");
+            writer.WriteElementString("Reset", "True");
+            writer.WriteElementString("Start", "True");
+            writer.WriteElementString("Split", "True");
+            writer.WriteElementString("End", "True");
+            writer.WriteElementString("Tazal", File.Tazal.ToString());
+            writer.WriteElementString("Ram", File.Ram.ToString());
+            writer.WriteElementString("SoleRegret", File.SoleRegret.ToString());
 
+            writer.WriteEndElement(); //AutoSplitterSettings
+
+            writer.WriteEndElement(); //Run
+            writer.WriteEndDocument();
+
+            writer.Flush();
             writer.Close();
         }
 
