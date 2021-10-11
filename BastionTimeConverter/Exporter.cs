@@ -17,6 +17,7 @@ namespace BastionTimeConverter
         public Dictionary<string, TimeSpan> SkywaySOB { get; private set; }
         public Dictionary<string, TimeSpan> LoadPB { get; private set; }
         public Dictionary<string, TimeSpan> LoadSOB { get; private set; }
+        public OffsetData Offsets { get; private set; }
 
         public Exporter(string fileName,
             SplitsFile file,
@@ -31,6 +32,7 @@ namespace BastionTimeConverter
             SkywaySOB = skywaySOB;
             LoadPB = loadPB;
             LoadSOB = loadSOB;
+            Offsets = new OffsetData();
         }
 
         public void Export(Target target)
@@ -80,9 +82,33 @@ namespace BastionTimeConverter
 
             writer.WriteElementString("Offset", "00:00:00");
             writer.WriteElementString("AttemptCount", File.AttemptCount);
-            writer.WriteElementString("AttemptHistory", null);
+            writer.WriteStartElement("AttemptHistory");
+
+            XmlNodeList nodes = File.File.DocumentElement["AttemptHistory"].ChildNodes;
+
+            foreach (XmlNode attempt in nodes)
+            {
+                writer.WriteStartElement("Attempt");
+                
+                for (int k = 0; k < attempt.Attributes.Count; k++)
+                {
+                    writer.WriteAttributeString(attempt.Attributes[k].Name, attempt.Attributes[k].Value);
+                }
+
+                if (attempt.HasChildNodes && attempt.FirstChild.Name == "RealTime")
+                {
+                    writer.WriteElementString("RealTime", attempt.FirstChild.InnerText);
+                }
+
+                writer.WriteEndElement(); //Attempt
+            }
+
+            writer.WriteEndElement(); //AttemptHistory
 
             writer.WriteStartElement("Segments");
+            
+            nodes = File.File.GetElementsByTagName("Segment");
+            XmlNodeList times = null;
 
             foreach (KeyValuePair<string, TimeSpan> entry in personalBest)
             {
@@ -100,8 +126,6 @@ namespace BastionTimeConverter
                     writer.WriteElementString("RealTime", entry.Value.ToString());
                 }
 
-                //writer.WriteElementString("GameTime", "00:00:00");
-
                 writer.WriteEndElement(); //SplitTime
                 writer.WriteEndElement(); //SplitTimes
 
@@ -109,7 +133,31 @@ namespace BastionTimeConverter
                 writer.WriteElementString("RealTime", sumOfBest[entry.Key].ToString());
                 writer.WriteEndElement(); //BestSegmentTime
 
-                writer.WriteElementString("SegmentHistory", null);
+                writer.WriteStartElement("SegmentHistory");
+
+                foreach (XmlNode seg in nodes)
+                {
+                    if (seg["Name"].InnerText == entry.Key)
+                    {
+                        times = seg["SegmentHistory"].ChildNodes;
+                        continue;
+                    }
+                }
+                
+                foreach (XmlNode time in times)
+                {
+                    writer.WriteStartElement("Time");
+                    writer.WriteAttributeString(time.Attributes[0].Name, time.Attributes[0].Value);
+
+                    if (time.HasChildNodes && time.FirstChild.Name == "RealTime")
+                    {
+                        writer.WriteElementString("RealTime", Convert(time["RealTime"].InnerText, entry.Key, target));
+                    }
+
+                    writer.WriteEndElement(); //Time
+                }
+
+                writer.WriteEndElement(); //SegmentHistory
                 writer.WriteEndElement(); //Segment
             }
 
@@ -135,6 +183,26 @@ namespace BastionTimeConverter
 
             writer.Flush();
             writer.Close();
+        }
+
+        private string Convert(string time, string level, Target target)
+        {
+            TimeSpan split = TimeSpan.Parse(time);
+            TimeSpan diff = Offsets.Delays[level];
+            TimeSpan prevDiff = File.Levels.IndexOf(level) - 1 > -1 ? Offsets.Delays[File.Levels[File.Levels.IndexOf(level) - 1]] : TimeSpan.Zero;
+
+            if (target == Target.Skyway)
+            {
+                split = split.Add(prevDiff);
+                split = split.Subtract(diff);
+            }
+            else
+            {
+                split = split.Subtract(prevDiff);
+                split = split.Add(diff);
+            }
+            
+            return split.ToString();
         }
 
         public enum Target
