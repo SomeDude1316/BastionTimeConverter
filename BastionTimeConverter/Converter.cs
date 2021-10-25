@@ -32,7 +32,7 @@ namespace BastionTimeConverter
             XmlDocument doc = new XmlDocument();
             doc.Load(openFile);
 
-            File = doc.GetElementsByTagName("GameName").Item(0).InnerText.ToUpper().Equals("BASTION") ? new SplitsFile(doc) : new SplitsFile();
+            File = doc.DocumentElement["GameName"].InnerText.ToUpper().Equals("BASTION") ? new SplitsFile(doc) : new SplitsFile();
         }
 
         public void Convert(SplitsFile.Comparison comparison)
@@ -156,6 +156,7 @@ namespace BastionTimeConverter
             }
 
             string timeFormat, format = "{0, 18} {1, 15} {2, 15}";
+            bool overHour = false;
 
             Console.WriteLine(format, "Split", "Skyway", "Load");
             Console.WriteLine();
@@ -164,12 +165,13 @@ namespace BastionTimeConverter
             {
                 if (entry.Value.Equals(TimeSpan.Zero))
                 {
-                    if (entry.Value.Hours > 0) Console.WriteLine(format, entry.Key, "-----------", "-----------");
+                    if (overHour) Console.WriteLine(format, entry.Key, "----------", "----------");
                     else Console.WriteLine(format, entry.Key, "--------", "--------");
                 }
                 else
                 {
                     timeFormat = entry.Value.Hours > 0 ? @"%h\:mm\:ss\.ff" : @"%m\:ss\.ff";
+                    if (!overHour) overHour = entry.Value.Hours > 0;
 
                     Console.WriteLine(format, entry.Key, entry.Value.ToString(timeFormat), load[entry.Key].ToString(timeFormat));
                 }
